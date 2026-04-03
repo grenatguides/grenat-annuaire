@@ -15,7 +15,7 @@ function Tag({ children, variant = 'default' }) {
       .tag-lang { background: var(--magenta-dim); color: var(--pink); border: 1px solid rgba(204,0,96,0.25); }
       .tag-dept { background: var(--cyan-dim); color: var(--cyan); border: 1px solid var(--cyan-border); }
       .tag-ville { background: rgba(255,255,255,0.06); color: var(--muted); border: 1px solid rgba(255,255,255,0.1); }
-      .tag-theme { background: rgba(120,100,200,0.15); color: #A89FE0; border: 1px solid rgba(120,100,200,0.25); }
+      .tag-theme { background: rgba(142,224,123,0.12); color: var(--green); border: 1px solid rgba(142,224,123,0.25); }
       .tag-default { background: rgba(255,255,255,0.07); color: var(--muted); border: 1px solid rgba(255,255,255,0.1); }
     `}</style>
   </span>;
@@ -30,7 +30,7 @@ function Section({ title, children }) {
       <style jsx>{`
         .section { margin-bottom: 32px; }
         .section-title {
-          font-family: 'Barlow Condensed', sans-serif;
+          font-family: 'Fugaz One', cursive;
           font-size: 13px; font-weight: 700;
           letter-spacing: 0.14em; text-transform: uppercase;
           color: var(--muted); margin-bottom: 12px;
@@ -261,14 +261,6 @@ export default function GuidePage({ guide, notFound }) {
         </div>
       </main>
 
-      <footer className="footer">
-        <div className="container">
-          <Link href="/" className="footer-link">← Retour à l&apos;annuaire</Link>
-          <span style={{color:'var(--muted)'}}> · </span>
-          <a href="https://cuddly-deliberate-838847.framer.app/" className="footer-link">Site Grenat</a>
-        </div>
-      </footer>
-
       {/* ── STYLES ── */}
       <style jsx>{`
         /* Nav */
@@ -305,7 +297,7 @@ export default function GuidePage({ guide, notFound }) {
           border-radius: 50%;
           background: linear-gradient(135deg, var(--surface2), #2A2860);
           display: flex; align-items: center; justify-content: center;
-          font-family: 'Barlow Condensed', sans-serif;
+          font-family: 'Fugaz One', cursive;
           font-size: 52px; font-weight: 700;
           color: var(--cyan);
           border: 3px solid var(--border);
@@ -317,7 +309,7 @@ export default function GuidePage({ guide, notFound }) {
           color: var(--magenta); margin-bottom: 8px;
         }
         .hero-name {
-          font-family: 'Barlow Condensed', sans-serif;
+          font-family: 'Fugaz One', cursive;
           font-size: clamp(40px, 7vw, 72px);
           font-weight: 600; line-height: 0.9;
           letter-spacing: -0.01em;
