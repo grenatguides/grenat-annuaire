@@ -83,14 +83,14 @@ function GuideCard({ guide }) {
           border-radius: 50%;
           background: linear-gradient(135deg, var(--surface2), #2A2860);
           display: flex; align-items: center; justify-content: center;
-          font-family: 'Barlow Condensed', sans-serif;
+          font-family: 'Fugaz One', cursive;
           font-size: 26px; font-weight: 700;
           color: var(--cyan);
           border: 2px solid var(--border);
         }
         .card-body { flex: 1; min-width: 0; }
         .card-name {
-          font-family: 'Barlow Condensed', sans-serif;
+          font-family: 'Fugaz One', cursive;
           font-size: 21px; font-weight: 600;
           line-height: 1.1; margin-bottom: 10px;
           letter-spacing: 0.02em;
@@ -118,9 +118,9 @@ function GuideCard({ guide }) {
           border: 1px solid rgba(255,255,255,0.1);
         }
         .tag-theme {
-          background: rgba(120,100,200,0.15);
-          color: #A89FE0;
-          border: 1px solid rgba(120,100,200,0.25);
+          background: rgba(142,224,123,0.12);
+          color: var(--green);
+          border: 1px solid rgba(142,224,123,0.25);
         }
         .card-cta {
           margin-top: 12px;
@@ -172,7 +172,7 @@ function FilterDropdown({ label, icon, options, selected, onToggle, onClose }) {
           border-radius: 7px;
           color: var(--white);
           padding: 8px 13px;
-          font-family: 'Barlow', sans-serif;
+          font-family: 'Roboto', sans-serif;
           font-size: 14px; font-weight: 500;
           cursor: pointer;
           transition: all 0.2s;
@@ -210,7 +210,7 @@ function FilterDropdown({ label, icon, options, selected, onToggle, onClose }) {
           width: 100%; background: none; border: none;
           color: var(--white);
           padding: 8px 10px; text-align: left;
-          font-family: 'Barlow', sans-serif; font-size: 14px;
+          font-family: 'Roboto', sans-serif; font-size: 14px;
           cursor: pointer; border-radius: 5px;
           transition: background 0.15s;
         }
@@ -290,19 +290,18 @@ export default function Annuaire({ guides, error }) {
       {/* ── HEADER ── */}
       <header className="header">
         <div className="container">
-          <a href="https://cuddly-deliberate-838847.framer.app/" className="back-link">
-            ← Retour au site Grenat
-          </a>
           <div className="header-content">
             <div className="header-text">
-              <div className="header-eyebrow">Auvergne-Rhône-Alpes</div>
+              <div className="header-eyebrow">Annuaire général des guides</div>
               <h1 className="header-title">
-                ANNUAIRE<br />
-                <span className="header-accent">DES GUIDES</span>
+                TROUVEZ LE GUIDE<br />
+                <span className="header-accent">QU'IL VOUS FAUT !</span>
               </h1>
               <p className="header-desc">
-                Retrouvez tous nos guides-conférenciers.<br />
-                Filtrez par langue, département, thématique ou type de visite.
+                Notre annuaire de guides-conférenciers GRENAT vous permet de prendre contact directement avec eux en fonction des secteurs et des langues étrangères que vous recherchez.
+              </p>
+              <p className="header-desc header-disclaimer">
+                La responsabilité de l'association ne saurait être engagée dans les relations nouées entre les professionnels du tourisme / clients et les guides-conférenciers adhérents de Grenat.
               </p>
             </div>
             <div className="header-badge">
@@ -406,15 +405,6 @@ export default function Annuaire({ guides, error }) {
         </div>
       </main>
 
-      <footer className="footer">
-        <div className="container">
-          <p>
-            <a href="https://cuddly-deliberate-838847.framer.app/" className="footer-link">← Retour au site Grenat</a>
-            {' · '}
-            <span style={{color:'var(--muted)'}}>Données mises à jour toutes les 5 minutes depuis Notion</span>
-          </p>
-        </div>
-      </footer>
 
       {/* ── STYLES ── */}
       <style jsx>{`
@@ -422,16 +412,8 @@ export default function Annuaire({ guides, error }) {
         .header {
           background: linear-gradient(180deg, var(--bg2) 0%, var(--bg) 100%);
           border-bottom: 1px solid var(--border);
-          padding: 40px 0 44px;
+          padding: 48px 0 44px;
         }
-        .back-link {
-          display: inline-block;
-          color: var(--muted); font-size: 13px;
-          letter-spacing: 0.06em; font-weight: 500;
-          margin-bottom: 32px;
-          transition: color 0.2s;
-        }
-        .back-link:hover { color: var(--cyan); }
         .header-content { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
         .header-eyebrow {
           font-size: 12px; font-weight: 600;
@@ -439,15 +421,21 @@ export default function Annuaire({ guides, error }) {
           color: var(--magenta); margin-bottom: 10px;
         }
         .header-title {
-          font-family: 'Barlow Condensed', sans-serif;
-          font-size: clamp(48px, 9vw, 88px);
+          font-family: 'Fugaz One', cursive;
+          font-size: clamp(40px, 7vw, 72px);
           font-weight: 800; line-height: 0.88;
           letter-spacing: -0.01em; text-transform: uppercase;
         }
         .header-accent { color: var(--cyan); }
         .header-desc {
-          margin-top: 18px;
+          margin-top: 14px;
           color: var(--muted); font-size: 15px; line-height: 1.6;
+          max-width: 560px;
+        }
+        .header-disclaimer {
+          font-size: 13px; margin-top: 10px;
+          color: #4D4C70;
+          font-style: italic;
         }
         .header-badge {
           display: flex; align-items: center; gap: 12px;
@@ -457,7 +445,7 @@ export default function Annuaire({ guides, error }) {
           flex-shrink: 0;
         }
         .badge-num {
-          font-family: 'Barlow Condensed', sans-serif;
+          font-family: 'Fugaz One', cursive;
           font-size: 48px; font-weight: 800;
           color: var(--cyan); line-height: 1;
         }
@@ -491,7 +479,7 @@ export default function Annuaire({ guides, error }) {
           border-radius: 7px;
           padding: 9px 36px 9px 38px;
           color: var(--white);
-          font-family: 'Barlow', sans-serif; font-size: 14px;
+          font-family: 'Roboto', sans-serif; font-size: 14px;
           width: 280px; max-width: 100%;
           outline: none; transition: border-color 0.2s;
         }
@@ -508,7 +496,7 @@ export default function Annuaire({ guides, error }) {
         .clear-all {
           background: none; border: 1px solid var(--border);
           border-radius: 7px;
-          color: var(--muted); font-family: 'Barlow', sans-serif;
+          color: var(--muted); font-family: 'Roboto', sans-serif;
           font-size: 13px; padding: 8px 13px;
           cursor: pointer; transition: all 0.2s;
         }
@@ -560,13 +548,13 @@ export default function Annuaire({ guides, error }) {
           color: var(--muted);
         }
         .empty-icon { font-size: 48px; margin-bottom: 16px; }
-        .empty-title { font-family: 'Barlow Condensed', sans-serif; font-size: 24px; font-weight: 700; color: var(--white); margin-bottom: 8px; }
+        .empty-title { font-family: 'Fugaz One', cursive; font-size: 24px; font-weight: 700; color: var(--white); margin-bottom: 8px; }
         .empty-sub { font-size: 15px; margin-bottom: 24px; }
         .btn-reset {
           background: none; border: 1px solid var(--border);
           border-radius: 8px; color: var(--white);
           padding: 10px 22px;
-          font-family: 'Barlow', sans-serif; font-size: 15px;
+          font-family: 'Roboto', sans-serif; font-size: 15px;
           cursor: pointer; transition: all 0.2s;
         }
         .btn-reset:hover { border-color: var(--cyan); color: var(--cyan); }
