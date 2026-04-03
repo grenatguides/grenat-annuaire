@@ -1,0 +1,45 @@
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:         #0E0D22;
+  --bg2:        #0A0920;
+  --surface:    #14133A;
+  --surface2:   #1B1A47;
+  --cyan:       #00CEC6;
+  --cyan-dim:   rgba(0, 206, 198, 0.15);
+  --cyan-border:rgba(0, 206, 198, 0.30);
+  --magenta:    #CC0060;
+  --magenta-dim:rgba(204, 0, 96, 0.18);
+  --pink:       #FF6BAD;
+  --white:      #F0EFF8;
+  --muted:      #7877A0;
+  --border:     #252450;
+  --radius:     10px;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--white);
+  font-family: 'Barlow', sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: inherit; text-decoration: none; }
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg2); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--muted); }
