@@ -1,21 +1,24 @@
-@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fugaz+One&family=Roboto:wght@400;500;700&display=swap');
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg:         #0E0D22;
-  --bg2:        #0A0920;
-  --surface:    #14133A;
-  --surface2:   #1B1A47;
-  --cyan:       #00CEC6;
-  --cyan-dim:   rgba(0, 206, 198, 0.15);
-  --cyan-border:rgba(0, 206, 198, 0.30);
-  --magenta:    #CC0060;
-  --magenta-dim:rgba(204, 0, 96, 0.18);
-  --pink:       #FF6BAD;
-  --white:      #F0EFF8;
-  --muted:      #7877A0;
-  --border:     #252450;
+  /* Charte Grenat — Communication externe */
+  --bg:         #1b1833;
+  --bg2:        #130f27;
+  --surface:    #221e3a;
+  --surface2:   #2a2648;
+  --cyan:       #38a9ce;
+  --cyan-dim:   rgba(56, 169, 206, 0.15);
+  --cyan-border:rgba(56, 169, 206, 0.30);
+  --magenta:    #b70440;
+  --magenta-dim:rgba(183, 4, 64, 0.18);
+  --pink:       #f9a7bf;
+  --green:      #8ee07b;
+  --grenat:     #6d0d34;
+  --white:      #f0eef8;
+  --muted:      #8b88b0;
+  --border:     #2e2a50;
   --radius:     10px;
 }
 
@@ -24,7 +27,7 @@ html { scroll-behavior: smooth; }
 body {
   background: var(--bg);
   color: var(--white);
-  font-family: 'Barlow', sans-serif;
+  font-family: 'Roboto', sans-serif;
   font-size: 16px;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
