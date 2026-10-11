@@ -67,7 +67,7 @@ function ContactItem({ href, icon, label, value }) {
         .ci-icon { font-size: 20px; flex-shrink: 0; }
         .ci-text { display: flex; flex-direction: column; gap: 1px; }
         .ci-label { font-size: 11px; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; font-weight: 600; }
-        .ci-value { font-size: 14px; color: var(--white); font-weight: 500; }
+        .ci-value { font-size: 14px; color: var(--white); font-weight: 500; overflow-wrap: anywhere; }
       `}</style>
     </Tag>
   );
@@ -85,7 +85,21 @@ export default function GuidePage({ guide, notFound }) {
   }
 
   const initials = `${guide.prenom?.[0] || ''}${guide.nom?.[0] || ''}`.toUpperCase();
-  const hasContact = guide.email || guide.telephone || guide.siteWeb;
+  const reseaux = [
+    ['instagram', '📷', 'Instagram'],
+    ['facebook', '👥', 'Facebook'],
+    ['linkedin', '💼', 'LinkedIn'],
+    ['youtube', '▶️', 'YouTube'],
+  ].filter(([k]) => guide[k]);
+  const hasContact = guide.email || guide.telephone || guide.siteWeb || reseaux.length > 0;
+  const lignes = (t) => (t || '').split(/\n|;/).map((x) => x.trim()).filter(Boolean);
+  const autresLieux = [
+    ['Autres musées et sites', lignes(guide.museesAutres)],
+    ["Villes et Pays d'Art et d'Histoire", lignes(guide.villesArtHistoire)],
+    ['Espaces naturels', lignes(guide.espacesNaturels)],
+    ['Autres lieux', lignes(guide.autresLieux)],
+  ].filter(([, l]) => l.length);
+  const vp = guide.visitePhare || {};
   const hasTags = guide.typesVisites.length || guide.musees.length || guide.thematiques.length || guide.publicCible.length;
 
   return (
@@ -166,6 +180,19 @@ export default function GuidePage({ guide, notFound }) {
                 </Section>
               )}
 
+              {/* Visite phare */}
+              {(vp.titre || vp.description) && (
+                <Section title="Visite phare">
+                  <div className="vp">
+                    {vp.image && <img src={vp.image} alt={vp.titre || 'Visite phare'} className="vp-img" />}
+                    <div className="vp-text">
+                      {vp.titre && <h4 className="vp-title">{vp.titre}</h4>}
+                      {vp.description && <p className="vp-desc">{vp.description}</p>}
+                    </div>
+                  </div>
+                </Section>
+              )}
+
               {/* Domaines */}
               {hasTags > 0 && (
                 <Section title="Domaines d'expertise">
@@ -205,6 +232,22 @@ export default function GuidePage({ guide, notFound }) {
                   </div>
                 </Section>
               )}
+
+              {/* Autres lieux de guidage */}
+              {autresLieux.length > 0 && (
+                <Section title="Lieux de guidage">
+                  <div className="tags-grid">
+                    {autresLieux.map(([titre, liste]) => (
+                      <div className="tags-group" key={titre}>
+                        <p className="tags-group-label">{titre}</p>
+                        <div className="tags-row">
+                          {liste.map((x) => <Tag key={x}>{x}</Tag>)}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </Section>
+              )}
             </div>
 
             {/* ── RIGHT COLUMN (sidebar) ── */}
@@ -231,6 +274,14 @@ export default function GuidePage({ guide, notFound }) {
                         icon="🌐" label="Site web" value={guide.siteWeb.replace(/^https?:\/\//, '')}
                       />
                     )}
+                    {reseaux.map(([k, icon, label]) => (
+                      <ContactItem
+                        key={k}
+                        href={guide[k].startsWith('http') ? guide[k] : `https://${guide[k]}`}
+                        icon={icon} label={label}
+                        value={guide[k].replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '')}
+                      />
+                    ))}
                   </div>
                 </Section>
               )}
@@ -347,6 +398,17 @@ export default function GuidePage({ guide, notFound }) {
           border-left: 3px solid var(--cyan);
           border-radius: 0 6px 6px 0;
         }
+
+        /* Visite phare */
+        .vp {
+          display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap;
+          padding: 20px; background: var(--surface);
+          border: 1px solid var(--border); border-radius: 10px;
+        }
+        .vp-img { width: 200px; max-width: 100%; border-radius: 8px; object-fit: cover; }
+        .vp-text { flex: 1; min-width: 200px; }
+        .vp-title { font-size: 18px; font-weight: 700; color: var(--white); margin-bottom: 8px; }
+        .vp-desc { font-size: 15px; line-height: 1.7; color: #C8C7E8; white-space: pre-line; }
 
         /* Tags */
         .tags-grid { display: flex; flex-direction: column; gap: 16px; }

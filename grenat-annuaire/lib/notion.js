@@ -23,6 +23,15 @@ export function parseGuide(page) {
 
   const richText = (field) =>
     (field?.rich_text || []).map((t) => t.plain_text).join('');
+  const fileUrl = (field) => {
+    const f = field?.files?.[0];
+    return f ? (f.type === 'file' ? f.file?.url : f.external?.url) || null : null;
+  };
+
+  // Coordonnées que le guide a choisi de masquer : elles ne quittent jamais le serveur
+  const masquees = p['Coordonnées masquées']?.multi_select?.map((s) => s.name) || [];
+  const montrer = (nom, valeur) => (masquees.includes(nom) ? '' : valeur || '');
+  const reseau = (champ) => montrer('Réseaux et site', p[champ]?.url);
 
   return {
     id: page.id,
@@ -33,9 +42,13 @@ export function parseGuide(page) {
     idGuide: p['ID Guide']?.number || null,
     statut: p['Statut']?.select?.name || '',
     photo,
-    email: p['Email']?.email || '',
-    telephone: p['Téléphone']?.phone_number || '',
-    siteWeb: p['Site Web']?.url || '',
+    email: montrer('E-mail', p['Email']?.email),
+    telephone: montrer('Téléphone', p['Téléphone']?.phone_number),
+    siteWeb: reseau('Site Web'),
+    instagram: reseau('Instagram'),
+    facebook: reseau('Facebook'),
+    linkedin: reseau('LinkedIn'),
+    youtube: reseau('Youtube'),
     departements: p['Départements']?.multi_select?.map((s) => s.name) || [],
     villes: p['Villes / Sites']?.multi_select?.map((s) => s.name) || [],
     langues: p['Langues']?.multi_select?.map((s) => s.name) || [],
@@ -45,6 +58,15 @@ export function parseGuide(page) {
     publicCible: p['Public']?.multi_select?.map((s) => s.name) || [],
     biographie: richText(p['Biographie']),
     lePlus: richText(p['Le + de ce guide']),
+    museesAutres: richText(p['Musées et sites - autres']),
+    villesArtHistoire: richText(p["Villes d'Art et d'Histoire"]),
+    espacesNaturels: richText(p['Espaces naturels']),
+    autresLieux: richText(p['Autres lieux de guidage']),
+    visitePhare: {
+      titre: richText(p['Visite phare – titre']),
+      description: richText(p['Visite phare – description']),
+      image: fileUrl(p['Visite phare – image']),
+    },
   };
 }
 
@@ -58,7 +80,14 @@ export async function fetchAllGuides() {
   do {
     const body = {
       page_size: 100,
-      filter: { property: 'Statut', select: { equals: 'Guide actif' } },
+      // « Visible dans l'annuaire » est calculé dans Notion : guide actif,
+      // adhésion valide et fiche non masquée.
+      filter: {
+        and: [
+          { property: 'Statut', select: { equals: 'Guide actif' } },
+          { property: "Visible dans l'annuaire", formula: { checkbox: { equals: true } } },
+        ],
+      },
       sorts: [{ property: 'Nom', direction: 'ascending' }],
     };
     if (cursor) body.start_cursor = cursor;
