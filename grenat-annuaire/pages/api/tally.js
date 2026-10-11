@@ -19,21 +19,33 @@ async function lireCorps(req) {
   return Buffer.concat(morceaux);
 }
 
-function signatureValide(corps, signature) {
-  const secret = process.env.TALLY_SIGNING_SECRET;
-  if (!secret || !signature) return false; // sécurité : on refuse tant que le secret n'est pas configuré
-  const attendu = crypto.createHmac('sha256', secret).update(corps).digest('base64');
-  const a = Buffer.from(attendu);
-  const b = Buffer.from(String(signature));
-  return a.length === b.length && crypto.timingSafeEqual(a, b);
+// Renvoie '' si la signature est bonne, sinon la raison du refus.
+function verifierSignature(corps, signature) {
+  const secret = (process.env.TALLY_SIGNING_SECRET || '').trim();
+  if (!secret) return 'TALLY_SIGNING_SECRET absent sur Vercel (ou site non redéployé)';
+  if (!signature) return "Tally n'a pas envoyé de signature (signing secret vide dans Tally ?)";
+  const egal = (x) => {
+    const a = Buffer.from(x);
+    const b = Buffer.from(String(signature));
+    return a.length === b.length && crypto.timingSafeEqual(a, b);
+  };
+  const hmac = (data) => crypto.createHmac('sha256', secret).update(data).digest('base64');
+  let recompose = '';
+  try {
+    recompose = JSON.stringify(JSON.parse(corps.toString('utf8')));
+  } catch {}
+  if (egal(hmac(corps)) || (recompose && egal(hmac(recompose)))) return '';
+  return 'Signature différente : le secret Tally et TALLY_SIGNING_SECRET ne sont pas identiques';
 }
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ erreur: 'POST uniquement' });
 
   const corps = await lireCorps(req);
-  if (!signatureValide(corps, req.headers['tally-signature'])) {
-    return res.status(401).json({ erreur: 'Signature Tally invalide' });
+  const refus = verifierSignature(corps, req.headers['tally-signature']);
+  if (refus) {
+    console.error('Webhook refusé :', refus);
+    return res.status(401).json({ erreur: refus });
   }
 
   let payload;
