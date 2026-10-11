@@ -46,3 +46,113 @@ a { color: inherit; text-decoration: none; }
 ::-webkit-scrollbar-track { background: var(--bg2); }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+/* ─── Barre de navigation du site principal ───────────── */
+.site-bar {
+  position: relative;
+  z-index: 110;
+  background: rgba(19, 15, 39, 0.92);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border);
+}
+.site-bar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 64px;
+  gap: 24px;
+}
+.site-logo {
+  font-family: 'Fugaz One', sans-serif;
+  font-size: 22px;
+  letter-spacing: 0.04em;
+  color: var(--white);
+}
+.site-nav {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+.site-nav-link {
+  font-size: 15px;
+  color: var(--muted);
+  transition: color 0.15s;
+}
+.site-nav-link:hover,
+.site-nav-link.is-current { color: var(--white); }
+.site-nav-link.is-current { box-shadow: inset 0 -2px 0 var(--magenta); padding-bottom: 2px; }
+.site-cta {
+  background: var(--magenta);
+  color: var(--white);
+  font-weight: 500;
+  font-size: 14px;
+  padding: 9px 18px;
+  border-radius: 999px;
+  transition: filter 0.15s;
+}
+.site-cta:hover { filter: brightness(1.15); }
+.site-burger {
+  display: none;
+  background: none;
+  border: 0;
+  padding: 8px;
+  cursor: pointer;
+}
+.site-burger span {
+  display: block;
+  width: 22px;
+  height: 2px;
+  margin: 4px 0;
+  background: var(--white);
+}
+
+@media (max-width: 760px) {
+  .site-burger { display: block; }
+  .site-nav {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 20px 24px 24px;
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+  }
+  .site-nav.is-open { display: flex; }
+}
+
+/* ─── Pied de page ────────────────────────────────────── */
+.site-footer {
+  margin-top: 64px;
+  padding: 40px 0 24px;
+  background: var(--bg2);
+  border-top: 1px solid var(--border);
+}
+.site-footer-inner {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 32px;
+}
+.site-footer-tagline {
+  margin-top: 8px;
+  max-width: 320px;
+  color: var(--muted);
+  font-size: 14px;
+}
+.site-footer-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--muted);
+}
+.site-footer-nav a:hover { color: var(--white); }
+.site-footer-copy {
+  margin-top: 32px;
+  font-size: 13px;
+  color: var(--muted);
+}
