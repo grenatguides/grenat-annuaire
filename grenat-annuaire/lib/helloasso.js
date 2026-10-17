@@ -13,8 +13,12 @@
 //  Règles :
 //   - seules les campagnes de type « Adhésion » dont l'adresse contient
 //     « adhesion » comptent (un repas ou un éductour ne valide rien) ;
-//   - payé entre octobre et décembre => cotisation de l'année suivante ;
-//   - valable jusqu'au 31 mars de l'année qui suit l'année de cotisation.
+//   - l'année de cotisation est lue dans l'adresse de la campagne (la plus
+//     grande année citée, ex. « adhesion-2027-… » => 2027) ; à défaut, un
+//     paiement à partir du 16 octobre compte pour l'année suivante ;
+//   - « Valide jusqu'au » = 31 décembre de l'année de cotisation (comme sur
+//     HelloAsso). Notion et l'annuaire laissent ensuite 3 mois de délai de
+//     grâce : la fiche reste visible jusqu'au 31 mars suivant.
 //
 //  Si aucun adhérent ne correspond à l'e-mail du paiement, une fiche Adhérents
 //  est créée avec un message « à vérifier » dans « Autres réponses ».
@@ -54,15 +58,17 @@ async function lireCommande(id) {
   return r.json();
 }
 
-// Année de cotisation et date de fin de validité à partir de la date de paiement
-export function validite(dateIso) {
-  const d = new Date(dateIso);
-  const [annee, mois] = new Intl.DateTimeFormat('fr-CA', { timeZone: 'Europe/Paris', year: 'numeric', month: '2-digit' })
-    .format(d)
-    .split('-')
-    .map(Number);
-  const cotisation = mois >= 10 ? annee + 1 : annee;
-  return { cotisation, valideJusquau: `${cotisation + 1}-03-31` };
+// Année de cotisation et date de fin de validité
+export function validite(dateIso, formSlug = '') {
+  const annees = (String(formSlug).match(/20\d{2}/g) || []).map(Number);
+  let cotisation = annees.length ? Math.max(...annees) : null;
+  if (!cotisation) {
+    const [annee, mois, jour] = new Intl.DateTimeFormat('fr-CA', {
+      timeZone: 'Europe/Paris', year: 'numeric', month: '2-digit', day: '2-digit',
+    }).format(new Date(dateIso)).split('-').map(Number);
+    cotisation = mois > 10 || (mois === 10 && jour >= 16) ? annee + 1 : annee;
+  }
+  return { cotisation, valideJusquau: `${cotisation}-12-31` };
 }
 
 export function estAdhesion(commande) {
@@ -83,7 +89,7 @@ export async function traiterNotification(notif) {
 
   const email = (commande.payer?.email || '').trim().toLowerCase();
   const date = paiement.date || commande.date;
-  const { cotisation, valideJusquau } = validite(date);
+  const { cotisation, valideJusquau } = validite(date, commande.formSlug);
   const montant = (commande.amount?.total ?? paiement.amount ?? 0) / 100;
 
   const proprietes = {
