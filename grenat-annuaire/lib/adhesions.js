@@ -96,6 +96,7 @@ export const QUESTIONS = [
   { debut: "Acceptez-vous que l'association diffuse", base: 'adherent', colonne: "Droit à l'image", type: 'choix' },
   { debut: "Acceptez-vous d'apparaître dans l'annuaire", type: 'special', cle: 'annuaire' },
   { debut: 'Règlement intérieur', type: 'special', cle: 'reglement' },
+  { debut: 'Signature', base: 'adherent', colonne: 'Signature règlement', type: 'fichier' },
 ];
 
 // =============================================================================
@@ -168,7 +169,10 @@ function lireChamp(f) {
   const opts = Object.fromEntries((f.options || []).map((o) => [o.id, o.text]));
   const v = f.value;
   if (v == null || v === '') return null;
-  if (f.type === 'FILE_UPLOAD') return Array.isArray(v) ? v : [];
+  if (f.type === 'FILE_UPLOAD' || f.type === 'SIGNATURE') {
+    if (typeof v === 'string') return [{ url: v, name: 'signature.png', mimeType: 'image/png' }];
+    return Array.isArray(v) ? v : [];
+  }
   if (Array.isArray(v)) return v.map((x) => (typeof x === 'string' ? opts[x] ?? x : x?.text ?? x)).filter(Boolean);
   if (typeof v === 'object') return JSON.stringify(v);
   return v;
@@ -209,7 +213,7 @@ export function repartir({ reponses }) {
   for (const r of reponses) {
     const q = trouverQuestion(r.label);
     if (!q) {
-      if (r.valeur != null && r.type !== 'FILE_UPLOAD') autres.push(`${r.label.replace(/<[^>]*>/g, '').trim()} : ${enTexte(r.valeur)}`);
+      if (r.valeur != null && !['FILE_UPLOAD', 'SIGNATURE'].includes(r.type)) autres.push(`${r.label.replace(/<[^>]*>/g, '').trim()} : ${enTexte(r.valeur)}`);
       continue;
     }
     if (q.type === 'special') {
@@ -220,7 +224,7 @@ export function repartir({ reponses }) {
     if (q.base === 'adherent' && (r.valeur == null || r.valeur === '')) continue;
     const cible = q.base === 'annuaire' ? annuaire : adherent;
     if (q.type === 'fichier') {
-      if (Array.isArray(r.valeur) && r.valeur.length) fichiers.push({ colonne: q.colonne, fichiers: r.valeur });
+      if (Array.isArray(r.valeur) && r.valeur.length) fichiers.push({ base: q.base, colonne: q.colonne, fichiers: r.valeur });
       continue;
     }
     if (q.type === 'liste') {
@@ -276,7 +280,7 @@ export function repartir({ reponses }) {
 
 // --- Recherche des fiches existantes -----------------------------------------
 
-async function chercherParEmail(base, email) {
+export async function chercherParEmail(base, email) {
   if (!email) return null;
   const r = await notion(`databases/${base}/query`, {
     method: 'POST',
@@ -291,7 +295,7 @@ async function chercherParEmail(base, email) {
   return r2.results.find((p) => (p.properties.Email?.email || '').toLowerCase() === email) || null;
 }
 
-async function lirePage(id) {
+export async function lirePage(id) {
   try {
     const p = await notion(`pages/${normId(id)}`);
     return p.archived ? null : p;
@@ -334,8 +338,9 @@ export async function enregistrerReponse(payload) {
   adherent['Dernière réponse formulaire'] = val.date(dateReponse);
 
   // Images
-  for (const { colonne, fichiers: liste } of fichiers) {
-    annuaire[colonne] = { files: await Promise.all(liste.slice(0, 3).map(copierFichier)) };
+  for (const { base, colonne, fichiers: liste } of fichiers) {
+    const cible = base === 'adherent' ? adherent : annuaire;
+    cible[colonne] = { files: await Promise.all(liste.slice(0, 3).map(copierFichier)) };
   }
 
   // 1. Fiche annuaire : via le lien personnel, sinon par e-mail
