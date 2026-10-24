@@ -90,7 +90,11 @@ export async function traiterNotification(notif) {
   const email = (commande.payer?.email || '').trim().toLowerCase();
   const date = paiement.date || commande.date;
   const { cotisation, valideJusquau } = validite(date, commande.formSlug);
-  const montant = (commande.amount?.total ?? paiement.amount ?? 0) / 100;
+  // Montant de l'adhésion seule (un éventuel don en plus n'est pas compté)
+  const lignesAdhesion = (commande.items || []).filter((i) => i.type === 'Membership');
+  const montant = (lignesAdhesion.length
+    ? lignesAdhesion.reduce((t, i) => t + (i.amount || 0), 0)
+    : commande.amount?.total ?? paiement.amount ?? 0) / 100;
 
   const proprietes = {
     'Date de paiement': val.date(date.slice(0, 10)),
