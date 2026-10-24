@@ -3,6 +3,8 @@
 // Le lien est envoyé individuellement par e-mail (Brevo) ; l'identifiant Notion
 // (32 caractères aléatoires) sert de clé : il n'est pas devinable.
 
+import { lireBase } from '../../lib/notion';
+
 const TALLY_FORM = 'https://tally.so/r/zxpZ4M';
 const DATABASE_ID = '2eceef96524a80fe82d4cb73e9ba6ed0';
 
@@ -40,6 +42,7 @@ function buildParams(page) {
     prenom: text(p['Prénom']),
     email: p['Email']?.email || '',
     tel: p['Téléphone']?.phone_number || '',
+    base: lireBase(p),
     langues: list(multi(p['Langues'])),
     departements: list(multi(p['Départements'])),
     villes: list(multi(p['Villes / Sites'])),
