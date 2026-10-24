@@ -26,6 +26,11 @@
 export const BASE_ANNUAIRE = '2eceef96524a80fe82d4cb73e9ba6ed0';
 export const BASE_ADHERENTS = '15feef96524a8056ba35e0a6cfadaa85';
 
+// Colonne « où le guide est basé » dans l'annuaire. Le premier nom trouvé dans
+// Notion est utilisé (texte ou sélection) : on peut donc la renommer en l'un
+// de ces noms sans rien casser.
+export const NOMS_COLONNE_BASE = ['Basé(e) à', 'Basé à', 'Base', 'base'];
+
 // Correspondance entre libellés Tally et options Notion quand ils diffèrent.
 const MUSEES_NOTION = {
   'Musée des Beaux-arts (Lyon)': 'Musée des Beaux-arts',
@@ -63,6 +68,7 @@ export const QUESTIONS = [
   { debut: 'Nom de votre structure', base: 'adherent', colonne: 'Société', type: 'texte' },
   { debut: 'Numéro de votre carte', base: 'adherent', colonne: 'N°carte de guide et année', type: 'texte' },
 
+  { debut: 'Où êtes-vous basé', type: 'special', cle: 'base' },
   { debut: 'Dans quelles langues', base: 'annuaire', colonne: 'Langues', type: 'liste' },
   { debut: 'Dans quels départements', base: 'annuaire', colonne: 'Départements', type: 'liste' },
   { debut: 'Dans quelles villes', base: 'annuaire', colonne: 'Villes / Sites', type: 'liste' },
@@ -275,7 +281,7 @@ export function repartir({ reponses }) {
 
   adherent['Autres réponses'] = val.texte(autres.join('\n'));
 
-  return { annuaire, adherent, fichiers, email, nom, prenom };
+  return { annuaire, adherent, fichiers, email, nom, prenom, base: enTexte(info.base ?? '').trim(), autres };
 }
 
 // --- Recherche des fiches existantes -----------------------------------------
@@ -333,7 +339,7 @@ async function copierFichier(f) {
 
 export async function enregistrerReponse(payload) {
   const lu = lireReponse(payload);
-  const { annuaire, adherent, fichiers, email } = repartir(lu);
+  const { annuaire, adherent, fichiers, email, base, autres } = repartir(lu);
   const dateReponse = (lu.date || new Date().toISOString()).slice(0, 10);
   adherent['Dernière réponse formulaire'] = val.date(dateReponse);
 
@@ -341,6 +347,16 @@ export async function enregistrerReponse(payload) {
   for (const { base, colonne, fichiers: liste } of fichiers) {
     const cible = base === 'adherent' ? adherent : annuaire;
     cible[colonne] = { files: await Promise.all(liste.slice(0, 3).map(copierFichier)) };
+  }
+
+  // Où le guide est basé : écrit dans la colonne qui existe dans Notion
+  if (base) {
+    const schema = (await notion(`databases/${BASE_ANNUAIRE}`)).properties || {};
+    const col = NOMS_COLONNE_BASE.find((n) => schema[n]);
+    const type = col && schema[col].type;
+    if (type === 'rich_text') annuaire[col] = val.texte(base);
+    else if (type === 'select') annuaire[col] = val.choix(base);
+    else adherent['Autres réponses'] = val.texte([...autres, `Basé(e) à : ${base}`].join('\n'));
   }
 
   // 1. Fiche annuaire : via le lien personnel, sinon par e-mail

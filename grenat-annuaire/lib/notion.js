@@ -9,6 +9,15 @@ export function slugify(prenom, nom) {
     .replace(/^-+|-+$/g, '');
 }
 
+// « Où le guide est basé » : colonne texte ou sélection, sous l'un de ces noms
+const NOMS_COLONNE_BASE = ['Basé(e) à', 'Basé à', 'Base', 'base'];
+export function lireBase(p) {
+  const f = p[NOMS_COLONNE_BASE.find((n) => p[n])];
+  if (!f) return '';
+  if (f.select) return f.select.name || '';
+  return (f.rich_text || f.title || []).map((t) => t.plain_text).join('').trim();
+}
+
 export function parseGuide(page) {
   const p = page.properties;
   const nom = p['Nom']?.title?.[0]?.plain_text || '';
@@ -58,6 +67,7 @@ export function parseGuide(page) {
     publicCible: p['Public']?.multi_select?.map((s) => s.name) || [],
     biographie: richText(p['Biographie']),
     lePlus: richText(p['Le + de ce guide']),
+    baseA: lireBase(p),
     museesAutres: richText(p['Musées et sites - autres']),
     villesArtHistoire: richText(p["Villes d'Art et d'Histoire"]),
     espacesNaturels: richText(p['Espaces naturels']),

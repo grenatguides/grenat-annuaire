@@ -136,7 +136,9 @@ export default function GuidePage({ guide, notFound }) {
 
             {/* Identity */}
             <div className="hero-identity">
-              <div className="hero-eyebrow">Guide-conférencier·e</div>
+              <div className="hero-eyebrow">
+                Guide-conférencier·e{guide.baseA ? ` · basé·e à ${guide.baseA}` : ''}
+              </div>
               <h1 className="hero-name">
                 {guide.prenom}<br />
                 <span className="hero-nom">{guide.nom}</span>

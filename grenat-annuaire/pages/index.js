@@ -27,6 +27,7 @@ function GuideCard({ guide }) {
         <h2 className="card-name">
           {guide.prenom} <span className="card-nom">{guide.nom}</span>
         </h2>
+        {guide.baseA && <div className="card-base">📍 {guide.baseA}</div>}
         {guide.langues.length > 0 && (
           <div className="card-tags">
             {guide.langues.map(l => (
@@ -54,6 +55,11 @@ function GuideCard({ guide }) {
         <div className="card-cta">Voir la fiche <span className="arrow">→</span></div>
       </div>
       <style jsx>{`
+        .card-base {
+          font-size: 13px;
+          color: var(--muted);
+          margin: -2px 0 6px;
+        }
         .card {
           display: flex;
           gap: 16px;
