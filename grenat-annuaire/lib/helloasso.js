@@ -17,16 +17,17 @@
 //     grande année citée, ex. « adhesion-2027-… » => 2027) ; à défaut, un
 //     paiement à partir du 16 octobre compte pour l'année suivante ;
 //   - « Valide jusqu'au » = 31 décembre de l'année de cotisation (comme sur
-//     HelloAsso). Notion et l'annuaire laissent ensuite 3 mois de délai de
-//     grâce : la fiche reste visible jusqu'au 31 mars suivant.
+//     HelloAsso). Notion et l'annuaire laissent ensuite 2 mois de délai de
+//     grâce : la fiche reste visible jusqu'à fin février.
 //
-//  Si aucun adhérent ne correspond à l'e-mail du paiement, une fiche Adhérents
-//  est créée avec un message « à vérifier » dans « Autres réponses ».
+//  L'adhérent est retrouvé par l'e-mail du paiement, sinon par nom + prénom
+//  (si un seul adhérent correspond). À défaut, une fiche Adhérents est créée
+//  avec un message « à vérifier » dans « Autres réponses ».
 //
 //  Variables Vercel : HELLOASSO_CLIENT_ID, HELLOASSO_CLIENT_SECRET
 // =============================================================================
 
-import { notion, val, chercherParEmail, lirePage, BASE_ANNUAIRE, BASE_ADHERENTS } from './adhesions';
+import { notion, val, chercherParEmail, chercherParNom, lirePage, BASE_ANNUAIRE, BASE_ADHERENTS } from './adhesions';
 
 const API = 'https://api.helloasso.com';
 const ORGANISATION = 'grenat';
@@ -113,6 +114,15 @@ export async function traiterNotification(notif) {
     if (lien) fiche = await lirePage(lien);
   }
   if (!fiche) fiche = await chercherParEmail(BASE_ANNUAIRE, email);
+  // E-mail différent de celui du formulaire : on essaie par nom + prénom
+  if (!adh && !fiche) {
+    const { lastName, firstName } = commande.payer || {};
+    adh = await chercherParNom(BASE_ADHERENTS, lastName, firstName);
+    if (adh) {
+      const lien = adh.properties?.['Fiche annuaire']?.relation?.[0]?.id;
+      if (lien) fiche = await lirePage(lien);
+    }
+  }
   if (!adh && fiche) {
     const lien = fiche.properties?.['Adhérent (interne)']?.relation?.[0]?.id;
     if (lien) adh = await lirePage(lien);
