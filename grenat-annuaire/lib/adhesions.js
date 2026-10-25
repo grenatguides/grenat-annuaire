@@ -29,6 +29,13 @@ export const BASE_ADHERENTS = '15feef96524a8056ba35e0a6cfadaa85';
 // Colonne « où le guide est basé » dans l'annuaire. Le premier nom trouvé dans
 // Notion est utilisé (texte ou sélection) : on peut donc la renommer en l'un
 // de ces noms sans rien casser.
+// Catégorie d'adhérent selon le formulaire Tally qui a envoyé la réponse.
+// Pour un futur formulaire (affiliés, partenaires), ajouter ici son identifiant
+// (les lettres à la fin de son adresse tally.so/r/...).
+const CATEGORIES = {
+  zxpZ4M: 'Guide actif',
+};
+
 export const NOMS_COLONNE_BASE = ['Basé(e) à', 'Basé à', 'Base', 'base'];
 
 // Correspondance entre libellés Tally et options Notion quand ils diffèrent.
@@ -301,6 +308,21 @@ export async function chercherParEmail(base, email) {
   return r2.results.find((p) => (p.properties.Email?.email || '').toLowerCase() === email) || null;
 }
 
+// Recherche par nom et prénom (sans tenir compte des accents ni des majuscules).
+// Ne renvoie une fiche que s'il y en a exactement une : sinon, mieux vaut vérifier à la main.
+export async function chercherParNom(base, nom, prenom) {
+  const n = norm(nom);
+  const p = norm(prenom);
+  if (!n || !p) return null;
+  const r = await notion(`databases/${base}/query`, {
+    method: 'POST',
+    body: { filter: { property: 'Nom', title: { contains: String(nom).trim().slice(0, 4) } }, page_size: 50 },
+  });
+  const texte = (f) => (f?.title || f?.rich_text || []).map((t) => t.plain_text).join('');
+  const trouves = r.results.filter((x) => norm(texte(x.properties.Nom)) === n && norm(texte(x.properties['Prénom'])) === p);
+  return trouves.length === 1 ? trouves[0] : null;
+}
+
 export async function lirePage(id) {
   try {
     const p = await notion(`pages/${normId(id)}`);
@@ -340,6 +362,7 @@ async function copierFichier(f) {
 export async function enregistrerReponse(payload) {
   const lu = lireReponse(payload);
   const { annuaire, adherent, fichiers, email, base, autres } = repartir(lu);
+  const categorie = CATEGORIES[payload?.data?.formId] || 'Guide actif';
   const dateReponse = (lu.date || new Date().toISOString()).slice(0, 10);
   adherent['Dernière réponse formulaire'] = val.date(dateReponse);
 
@@ -380,6 +403,9 @@ export async function enregistrerReponse(payload) {
 
   // 4. Écriture fiche adhérent (avec le lien vers la fiche annuaire)
   adherent['Fiche annuaire'] = val.relation([fiche.id]);
+  // Catégorie : remplie si vide (on ne remplace pas une catégorie choisie à la main,
+  // par ex. « Membre d'honneur »)
+  if (!adh?.properties?.['Catégorie']?.select?.name) adherent['Catégorie'] = val.choix(categorie);
   if (adh) {
     await notion(`pages/${adh.id}`, { method: 'PATCH', body: { properties: adherent } });
   } else {

@@ -26,7 +26,32 @@ const COORDS = [
 
 const normId = (s) => String(s || '').replace(/-/g, '').toLowerCase();
 
-function buildParams(page) {
+// Informations internes (adresse, carte pro…) lues dans la fiche Adhérents liée.
+// Elles ne sont jamais affichées sur le site : seulement pré-remplies dans le formulaire.
+async function lireAdherent(page) {
+  const lien = page.properties?.['Adhérent (interne)']?.relation?.[0]?.id;
+  const token = process.env.NOTION_ADHESIONS_TOKEN;
+  if (!lien || !token) return {};
+  try {
+    const r = await fetch(`https://api.notion.com/v1/pages/${normId(lien)}`, {
+      headers: { Authorization: `Bearer ${token}`, 'Notion-Version': '2022-06-28' },
+    });
+    if (!r.ok) return {};
+    const p = (await r.json()).properties || {};
+    const text = (f) => (f?.rich_text || []).map((t) => t.plain_text).join('').trim();
+    return {
+      adresse: text(p['Adresse']),
+      cp: text(p['Code Postal']),
+      ville: text(p['Ville']),
+      structure: text(p['Société']),
+      carte: text(p['N°carte de guide et année']),
+    };
+  } catch {
+    return {};
+  }
+}
+
+function buildParams(page, interne = {}) {
   const p = page.properties;
   const text = (f) => (f?.rich_text || []).map((t) => t.plain_text).join('');
   const multi = (f) => (f?.multi_select || []).map((s) => s.name);
@@ -64,6 +89,7 @@ function buildParams(page) {
     linkedin: p['LinkedIn']?.url || '',
     youtube: p['Youtube']?.url || '',
     coords: list(coords),
+    ...interne,
   };
 
   const qs = new URLSearchParams();
@@ -93,7 +119,7 @@ export async function getServerSideProps({ params, res }) {
   }
 
   return {
-    redirect: { destination: `${TALLY_FORM}?${buildParams(page)}`, permanent: false },
+    redirect: { destination: `${TALLY_FORM}?${buildParams(page, await lireAdherent(page))}`, permanent: false },
   };
 }
 
