@@ -26,16 +26,21 @@
 export const BASE_ANNUAIRE = '2eceef96524a80fe82d4cb73e9ba6ed0';
 export const BASE_ADHERENTS = '15feef96524a8056ba35e0a6cfadaa85';
 
+// Catégorie d'adhérent : « Guide actif », ou « Membre affilié » si la personne
+// répond « Non » à « Êtes-vous titulaire de la carte professionnelle… ».
+// Une catégorie mise à la main (membre d'honneur, partenaire) n'est jamais remplacée.
+const CATEGORIES_MANUELLES = ["Membre d'honneur", 'Membre partenaire'];
+
+// Chartes : texte de la case Tally -> option de la colonne « Chartes signées »
+const CHARTES = {
+  "Je m'engage à respecter la charte de bonnes pratiques du Site historique de Lyon (UNESCO)": 'Site historique de Lyon (UNESCO)',
+  "Je m'engage à respecter la charte de bonnes pratiques du parc de la Tête d'Or": "Parc de la Tête d'Or",
+  "Je m'engage à respecter la charte de bonne conduite de la cathédrale Saint-Maurice de Vienne": 'Cathédrale de Vienne',
+};
+
 // Colonne « où le guide est basé » dans l'annuaire. Le premier nom trouvé dans
 // Notion est utilisé (texte ou sélection) : on peut donc la renommer en l'un
 // de ces noms sans rien casser.
-// Catégorie d'adhérent selon le formulaire Tally qui a envoyé la réponse.
-// Pour un futur formulaire (affiliés, partenaires), ajouter ici son identifiant
-// (les lettres à la fin de son adresse tally.so/r/...).
-const CATEGORIES = {
-  zxpZ4M: 'Guide actif',
-};
-
 export const NOMS_COLONNE_BASE = ['Basé(e) à', 'Basé à', 'Base', 'base'];
 
 // Correspondance entre libellés Tally et options Notion quand ils diffèrent.
@@ -64,6 +69,7 @@ const COORDONNEES = {
 // -----------------------------------------------------------------------------
 export const QUESTIONS = [
   { debut: 'Votre situation', type: 'special', cle: 'situation' },
+  { debut: 'Êtes-vous titulaire de la carte', type: 'special', cle: 'carte' },
 
   { debut: 'Nom', exact: true, type: 'special', cle: 'nom' },
   { debut: 'Prénom', type: 'special', cle: 'prenom' },
@@ -74,6 +80,7 @@ export const QUESTIONS = [
   { debut: 'Ville', exact: true, base: 'adherent', colonne: 'Ville', type: 'texte' },
   { debut: 'Nom de votre structure', base: 'adherent', colonne: 'Société', type: 'texte' },
   { debut: 'Numéro de votre carte', base: 'adherent', colonne: 'N°carte de guide et année', type: 'texte' },
+  { debut: 'Justificatif de votre statut', base: 'adherent', colonne: 'Justificatif affilié', type: 'fichier' },
 
   { debut: 'Où êtes-vous basé', type: 'special', cle: 'base' },
   { debut: 'Dans quelles langues', base: 'annuaire', colonne: 'Langues', type: 'liste' },
@@ -108,6 +115,8 @@ export const QUESTIONS = [
   { debut: 'Quels e-mails souhaitez-vous', type: 'special', cle: 'mailing' },
   { debut: "Acceptez-vous que l'association diffuse", base: 'adherent', colonne: "Droit à l'image", type: 'choix' },
   { debut: "Acceptez-vous d'apparaître dans l'annuaire", type: 'special', cle: 'annuaire' },
+  { debut: 'Chartes du Site historique', base: 'adherent', colonne: 'Chartes signées', type: 'liste', renommer: CHARTES },
+  { debut: 'Charte de bonne conduite', base: 'adherent', colonne: 'Chartes signées', type: 'liste', renommer: CHARTES, ajouter: true },
   { debut: 'Règlement intérieur', type: 'special', cle: 'reglement' },
   { debut: 'Signature', base: 'adherent', colonne: 'Signature règlement', type: 'fichier' },
 ];
@@ -288,7 +297,11 @@ export function repartir({ reponses }) {
 
   adherent['Autres réponses'] = val.texte(autres.join('\n'));
 
-  return { annuaire, adherent, fichiers, email, nom, prenom, base: enTexte(info.base ?? '').trim(), autres };
+  return {
+    annuaire, adherent, fichiers, email, nom, prenom, autres,
+    base: enTexte(info.base ?? '').trim(),
+    affilie: norm(enTexte(info.carte)) === 'non',
+  };
 }
 
 // --- Recherche des fiches existantes -----------------------------------------
@@ -361,8 +374,9 @@ export async function copierFichier(f) {
 
 export async function enregistrerReponse(payload) {
   const lu = lireReponse(payload);
-  const { annuaire, adherent, fichiers, email, base, autres } = repartir(lu);
-  const categorie = CATEGORIES[payload?.data?.formId] || 'Guide actif';
+  const { annuaire, adherent, fichiers, email, base, autres, affilie } = repartir(lu);
+  const categorie = affilie ? 'Membre affilié' : 'Guide actif';
+  if (affilie) adherent["Apparaître dans l'annuaire"] = val.choix('Non');
   const dateReponse = (lu.date || new Date().toISOString()).slice(0, 10);
   adherent['Dernière réponse formulaire'] = val.date(dateReponse);
 
@@ -373,7 +387,7 @@ export async function enregistrerReponse(payload) {
   }
 
   // Où le guide est basé : écrit dans la colonne qui existe dans Notion
-  if (base) {
+  if (base && !affilie) {
     const schema = (await notion(`databases/${BASE_ANNUAIRE}`)).properties || {};
     const col = NOMS_COLONNE_BASE.find((n) => schema[n]);
     const type = col && schema[col].type;
@@ -394,23 +408,27 @@ export async function enregistrerReponse(payload) {
   if (!adh) adh = await chercherParEmail(BASE_ADHERENTS, email);
 
   // 3. Écriture fiche annuaire
-  if (fiche) {
+  //    Membre affilié : pas de fiche publique (une fiche existante passe en « Membre affilié »,
+  //    ce qui la retire de l'annuaire sans la supprimer)
+  if (affilie) {
+    if (fiche) await notion(`pages/${fiche.id}`, { method: 'PATCH', body: { properties: { Statut: val.choix('Membre affilié') } } });
+  } else if (fiche) {
+    if (fiche.properties?.Statut?.select?.name === 'Membre affilié') annuaire.Statut = val.choix('Guide actif');
     await notion(`pages/${fiche.id}`, { method: 'PATCH', body: { properties: annuaire } });
   } else {
     annuaire.Statut = val.choix('Guide actif');
     fiche = await notion('pages', { method: 'POST', body: { parent: { database_id: BASE_ANNUAIRE }, properties: annuaire } });
   }
 
-  // 4. Écriture fiche adhérent (avec le lien vers la fiche annuaire)
-  adherent['Fiche annuaire'] = val.relation([fiche.id]);
-  // Catégorie : remplie si vide (on ne remplace pas une catégorie choisie à la main,
-  // par ex. « Membre d'honneur »)
-  if (!adh?.properties?.['Catégorie']?.select?.name) adherent['Catégorie'] = val.choix(categorie);
+  // 4. Écriture fiche adhérent (avec le lien vers la fiche annuaire s'il y en a une)
+  if (fiche) adherent['Fiche annuaire'] = val.relation([fiche.id]);
+  const categorieActuelle = adh?.properties?.['Catégorie']?.select?.name;
+  if (!CATEGORIES_MANUELLES.includes(categorieActuelle)) adherent['Catégorie'] = val.choix(categorie);
   if (adh) {
     await notion(`pages/${adh.id}`, { method: 'PATCH', body: { properties: adherent } });
   } else {
     adh = await notion('pages', { method: 'POST', body: { parent: { database_id: BASE_ADHERENTS }, properties: adherent } });
   }
 
-  return { fiche: fiche.id, adherent: adh.id, nouveau: !lien && !lu.caches.guide_id };
+  return { fiche: fiche?.id || null, adherent: adh.id, categorie, nouveau: !lien && !lu.caches.guide_id };
 }

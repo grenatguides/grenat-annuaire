@@ -89,6 +89,8 @@ function buildParams(page, interne = {}) {
     linkedin: p['LinkedIn']?.url || '',
     youtube: p['Youtube']?.url || '',
     coords: list(coords),
+    // Les guides de l'annuaire ont la carte professionnelle : réponse « Oui » pré-cochée
+    carte_pro: p['Statut']?.select?.name === 'Guide actif' ? 'Oui' : '',
     ...interne,
   };
 
