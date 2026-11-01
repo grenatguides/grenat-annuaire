@@ -334,7 +334,7 @@ export async function lirePage(id) {
 
 // --- Copie des images dans Notion (pour ne pas dépendre de Tally) ------------
 
-async function copierFichier(f) {
+export async function copierFichier(f) {
   const token = process.env.NOTION_ADHESIONS_TOKEN;
   try {
     const src = await fetch(f.url);

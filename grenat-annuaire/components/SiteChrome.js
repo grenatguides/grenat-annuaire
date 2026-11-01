@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useRouter } from 'next/router';
 
 const SITE = 'https://www.lesguidesgrenat.fr';
 
@@ -6,7 +7,8 @@ const NAV = [
   { label: 'Accueil', href: `${SITE}/` },
   { label: "L'association", href: `${SITE}/association` },
   { label: 'Le métier', href: `${SITE}/m%C3%A9tier` },
-  { label: 'Annuaire', href: '/', current: true },
+  { label: 'Annuaire', href: '/' },
+  { label: 'Agenda', href: '/agenda' },
 ];
 
 const CTA = { label: 'Trouver un guide', href: 'https://tally.so/r/81ZAqo' };
@@ -20,6 +22,8 @@ const SOCIALS = [
 
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
+  const { pathname } = useRouter();
+  const actif = (item) => (item.href === '/agenda' ? pathname === '/agenda' : item.href === '/' && pathname !== '/agenda');
   return (
     <div className="site-bar">
       <div className="container site-bar-inner">
@@ -40,8 +44,8 @@ export function SiteHeader() {
             <a
               key={item.label}
               href={item.href}
-              className={`site-nav-link${item.current ? ' is-current' : ''}`}
-              aria-current={item.current ? 'page' : undefined}
+              className={`site-nav-link${actif(item) ? ' is-current' : ''}`}
+              aria-current={actif(item) ? 'page' : undefined}
             >
               {item.label}
             </a>
