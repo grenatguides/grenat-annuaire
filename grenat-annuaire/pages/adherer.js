@@ -4,9 +4,9 @@ import Head from 'next/head';
 // Pour changer un tarif ou un texte, modifier la liste ci-dessous.
 const FORMULES = [
   {
-    titre: 'Guide-conférencier',
+    titre: 'Membre actif',
     prix: '40 €',
-    pour: 'Vous êtes titulaire de la carte professionnelle de guide-conférencier.',
+    pour: 'Vous êtes titulaire de la carte professionnelle de guide-conférencier. Vous votez à l\u2019assemblée générale.',
     plus: ['Votre fiche dans l’annuaire des guides', 'Vos visites dans l’agenda', 'La vie de l’association : AG, éductours, JIG…'],
     lien: 'https://tally.so/r/zxpZ4M',
     bouton: 'Adhérer comme guide',
@@ -14,11 +14,11 @@ const FORMULES = [
   {
     titre: 'Membre affilié',
     prix: '25 €',
-    pour: 'Vous n’avez pas (encore) la carte professionnelle : en cours de formation, VAE, équivalence…',
+    pour: 'Vous n’avez pas la carte professionnelle (formation, VAE, équivalence…), ou vous l’avez mais ne souhaitez pas être membre actif (par exemple salarié·e).',
     plus: ['La vie de l’association : AG, éductours, JIG…', 'Les informations du réseau'],
     lien: 'https://tally.so/r/zxpZ4M',
     bouton: 'Adhérer comme affilié·e',
-    note: 'Même formulaire : répondez « Non » à la question sur la carte professionnelle.',
+    note: 'Même formulaire que les guides : choisissez « Membre affilié\u00b7e » à la première question.',
   },
   {
     titre: 'Membre partenaire',

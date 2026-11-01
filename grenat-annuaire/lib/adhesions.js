@@ -27,7 +27,8 @@ export const BASE_ANNUAIRE = '2eceef96524a80fe82d4cb73e9ba6ed0';
 export const BASE_ADHERENTS = '15feef96524a8056ba35e0a6cfadaa85';
 
 // Catégorie d'adhérent : « Guide actif », ou « Membre affilié » si la personne
-// répond « Non » à « Êtes-vous titulaire de la carte professionnelle… ».
+// choisit « Membre affilié·e » à « Sous quel statut souhaitez-vous adhérer ? »
+// (sans carte professionnelle, ou titulaire ne souhaitant pas être membre actif).
 // Une catégorie mise à la main (membre d'honneur, partenaire) n'est jamais remplacée.
 const CATEGORIES_MANUELLES = ["Membre d'honneur", 'Membre partenaire'];
 
@@ -69,6 +70,7 @@ const COORDONNEES = {
 // -----------------------------------------------------------------------------
 export const QUESTIONS = [
   { debut: 'Votre situation', type: 'special', cle: 'situation' },
+  { debut: 'Sous quel statut', type: 'special', cle: 'carte' },
   { debut: 'Êtes-vous titulaire de la carte', type: 'special', cle: 'carte' },
 
   { debut: 'Nom', exact: true, type: 'special', cle: 'nom' },
@@ -300,7 +302,7 @@ export function repartir({ reponses }) {
   return {
     annuaire, adherent, fichiers, email, nom, prenom, autres,
     base: enTexte(info.base ?? '').trim(),
-    affilie: norm(enTexte(info.carte)) === 'non',
+    affilie: ['non'].includes(norm(enTexte(info.carte))) || norm(enTexte(info.carte)).includes('affili'),
   };
 }
 
