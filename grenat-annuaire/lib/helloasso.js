@@ -72,6 +72,13 @@ export function validite(dateIso, formSlug = '') {
   return { cotisation, valideJusquau: `${cotisation}-12-31` };
 }
 
+// Catégorie d'après l'adresse de la campagne HelloAsso
+export function categorieCampagne(formSlug = '') {
+  if (/partenaire/i.test(formSlug)) return 'Membre partenaire';
+  if (/affili/i.test(formSlug)) return 'Membre affilié';
+  return 'Guide actif';
+}
+
 export function estAdhesion(commande) {
   return commande?.formType === 'Membership' && /adhesion/i.test(commande?.formSlug || '');
 }
@@ -129,6 +136,10 @@ export async function traiterNotification(notif) {
   }
 
   if (adh) {
+    // Campagne affiliés / partenaires : on note la catégorie (sauf membre d'honneur)
+    const cat = categorieCampagne(commande.formSlug);
+    const actuelle = adh.properties?.['Catégorie']?.select?.name;
+    if (cat !== 'Guide actif' && actuelle !== "Membre d'honneur") proprietes['Catégorie'] = val.choix(cat);
     await notion(`pages/${adh.id}`, { method: 'PATCH', body: { properties: proprietes } });
   } else {
     const p = commande.payer || {};
@@ -141,6 +152,7 @@ export async function traiterNotification(notif) {
           Nom: val.titre(p.lastName || email),
           'Prénom': val.texte(p.firstName || ''),
           Email: val.email(email),
+          'Catégorie': val.choix(categorieCampagne(commande.formSlug)),
           'Autres réponses': val.texte(
             "⚠️ Paiement HelloAsso reçu sans fiche correspondante (e-mail différent de celui du formulaire ?). À vérifier et relier à la bonne fiche."
           ),
