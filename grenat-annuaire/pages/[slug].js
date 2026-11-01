@@ -1,6 +1,8 @@
 import Head from 'next/head';
 import Link from 'next/link';
 import { fetchAllGuides } from '../lib/notion';
+import { fetchVisites } from '../lib/visites';
+import { CarteVisite } from '../components/Visites';
 
 /* ─── Tag component ─────────────────────────────────── */
 function Tag({ children, variant = 'default' }) {
@@ -74,7 +76,7 @@ function ContactItem({ href, icon, label, value }) {
 }
 
 /* ─── Guide Profile Page ────────────────────────────── */
-export default function GuidePage({ guide, notFound }) {
+export default function GuidePage({ guide, visites = [], notFound }) {
   if (notFound || !guide) {
     return (
       <div style={{ textAlign: 'center', padding: '100px 24px' }}>
@@ -191,6 +193,15 @@ export default function GuidePage({ guide, notFound }) {
                       {vp.titre && <h4 className="vp-title">{vp.titre}</h4>}
                       {vp.description && <p className="vp-desc">{vp.description}</p>}
                     </div>
+                  </div>
+                </Section>
+              )}
+
+              {/* Prochaines visites (agenda) */}
+              {visites.length > 0 && (
+                <Section title="Prochaines visites">
+                  <div className="visites">
+                    {visites.map((v) => <CarteVisite key={v.id} v={v} avecGuide={false} />)}
                   </div>
                 </Section>
               )}
@@ -412,6 +423,8 @@ export default function GuidePage({ guide, notFound }) {
         .vp-title { font-size: 18px; font-weight: 700; color: var(--white); margin-bottom: 8px; }
         .vp-desc { font-size: 15px; line-height: 1.7; color: #C8C7E8; white-space: pre-line; }
 
+        .visites { display: flex; flex-direction: column; gap: 12px; }
+
         /* Tags */
         .tags-grid { display: flex; flex-direction: column; gap: 16px; }
         .tags-group {}
@@ -466,7 +479,13 @@ export async function getStaticProps({ params }) {
     const guides = await fetchAllGuides();
     const guide = guides.find(g => g.slug === params.slug) || null;
     if (!guide) return { notFound: true, revalidate: 60 };
-    return { props: { guide }, revalidate: 300 };
+    let visites = [];
+    try {
+      visites = (await fetchVisites(guides)).filter((v) => v.guide.slug === guide.slug);
+    } catch (e) {
+      console.error('Visites :', e.message);
+    }
+    return { props: { guide, visites }, revalidate: 300 };
   } catch (error) {
     return { props: { guide: null, error: error.message }, revalidate: 60 };
   }
