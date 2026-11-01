@@ -63,11 +63,17 @@ a { color: inherit; text-decoration: none; }
   gap: 24px;
 }
 .site-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
   font-family: 'Fugaz One', sans-serif;
   font-size: 22px;
   letter-spacing: 0.04em;
   color: var(--white);
 }
+.site-logo-g { height: 30px; width: auto; display: block; }
+.site-footer .site-logo { font-size: 30px; color: #7aa9d4; }
+.site-footer .site-logo-g { height: 40px; }
 .site-nav {
   display: flex;
   align-items: center;

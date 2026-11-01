@@ -24,11 +24,11 @@ const SOCIALS = [
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
   const { pathname } = useRouter();
-  const actif = (item) => (item.href === '/agenda' ? pathname === '/agenda' : item.href === '/' && pathname !== '/agenda');
+  const actif = (item) => (item.href === '/' ? !['/agenda', '/adherer'].includes(pathname) : item.href === pathname);
   return (
     <div className="site-bar">
       <div className="container site-bar-inner">
-        <a href={`${SITE}/`} className="site-logo">GRENAT</a>
+        <a href={`${SITE}/`} className="site-logo"><img src="/logo-g.png" alt="" className="site-logo-g" />GRENAT</a>
 
         <button
           type="button"
@@ -65,7 +65,7 @@ export function SiteFooter() {
     <footer className="site-footer">
       <div className="container site-footer-inner">
         <div>
-          <a href={`${SITE}/`} className="site-logo">GRENAT</a>
+          <a href={`${SITE}/`} className="site-logo"><img src="/logo-g.png" alt="" className="site-logo-g" />GRENAT</a>
           <p className="site-footer-tagline">
             Association professionnelle des guides conférenciers en Auvergne-Rhône-Alpes
           </p>
