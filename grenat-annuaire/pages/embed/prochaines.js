@@ -31,7 +31,7 @@ export async function getStaticProps() {
   try {
     const guides = await fetchAllGuides();
     const visites = (await fetchVisites(guides)).slice(0, 2);
-    return { props: { visites }, revalidate: 300 };
+    return { props: { visites }, revalidate: 60 };
   } catch (e) {
     console.error('Prochaines visites :', e);
     return { props: { visites: [] }, revalidate: 60 };
