@@ -13,7 +13,6 @@ export function CarteVisite({ v, compact = false, externe = false, avecGuide = t
   const cible = externe ? { target: '_top' } : {};
   const ficheGuide = externe ? `${ANNUAIRE}/${v.guide.slug}` : `/${v.guide.slug}`;
   const prix = prixLabel(v.prix);
-  const lieu = [v.lieu, v.ville].filter(Boolean).join(' · ');
   const [jour, ...resteDate] = v.dateCourte.split(' ');
 
   return (
@@ -30,9 +29,10 @@ export function CarteVisite({ v, compact = false, externe = false, avecGuide = t
           {v.dateLabel.charAt(0).toUpperCase() + v.dateLabel.slice(1)}
           {v.horaire && <> · {v.horaire}</>}
         </p>
-        {lieu && <p className="visite-lieu">📍 {lieu}</p>}
+        {v.lieu && <p className="visite-lieu">📍 Rendez-vous : {v.lieu}</p>}
         {!compact && v.description && <p className="visite-desc">{v.description}</p>}
         <div className="visite-tags">
+          {v.ville && <span className="vt vt-ville">📍 {v.ville}</span>}
           {prix && <span className="vt vt-prix">{prix}</span>}
           {v.public && <span className="vt">{v.public}</span>}
           {v.langues.map((l) => <span key={l} className="vt vt-lang">{l}</span>)}
@@ -87,6 +87,7 @@ export function CarteVisite({ v, compact = false, externe = false, avecGuide = t
           background: rgba(255,255,255,0.07); color: var(--muted); border: 1px solid rgba(255,255,255,0.1);
         }
         .vt-prix { background: rgba(142,224,123,0.12); color: var(--green); border-color: rgba(142,224,123,0.25); }
+        .vt-ville { background: var(--cyan-dim); color: var(--cyan); border-color: var(--cyan-border); }
         .vt-lang { background: var(--magenta-dim); color: var(--pink); border-color: rgba(204,0,96,0.25); }
         .visite-pied { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
         .visite-guide { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; color: var(--muted); }

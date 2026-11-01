@@ -485,7 +485,7 @@ export async function getStaticProps({ params }) {
     } catch (e) {
       console.error('Visites :', e.message);
     }
-    return { props: { guide, visites }, revalidate: 300 };
+    return { props: { guide, visites }, revalidate: 60 };
   } catch (error) {
     return { props: { guide: null, error: error.message }, revalidate: 60 };
   }
