@@ -1,7 +1,8 @@
 // Reçoit les réponses des formulaires Tally (webhook) et les enregistre dans Notion :
 //  - formulaire d'adhésion : lib/adhesions.js
 //  - formulaire « Proposer une visite » : lib/visites.js
-// Les deux formulaires utilisent la même adresse et le même « Signing secret ».
+//  - formulaire des membres partenaires : lib/partenaires.js
+// Tous les formulaires utilisent la même adresse et le même « Signing secret ».
 //
 // Variables à définir dans Vercel (Settings > Environment Variables) :
 //   NOTION_ADHESIONS_TOKEN : clé de la connexion Notion « Adhésions Grenat »
@@ -13,6 +14,7 @@
 import crypto from 'crypto';
 import { enregistrerReponse } from '../../lib/adhesions';
 import { enregistrerVisite, FORMULAIRE_VISITE } from '../../lib/visites';
+import { enregistrerPartenaire, FORMULAIRE_PARTENAIRE } from '../../lib/partenaires';
 
 export const config = { api: { bodyParser: false }, maxDuration: 60 };
 
@@ -60,10 +62,13 @@ export default async function handler(req, res) {
   if (payload.eventType && payload.eventType !== 'FORM_RESPONSE') return res.status(200).json({ ignore: true });
 
   try {
-    // Formulaire « Proposer une visite » -> agenda ; tous les autres -> adhésions
-    const r = payload?.data?.formId === FORMULAIRE_VISITE
+    // « Proposer une visite » -> agenda ; « Partenaires » -> partenaires ; les autres -> adhésions
+    const formId = payload?.data?.formId;
+    const r = formId === FORMULAIRE_VISITE
       ? await enregistrerVisite(payload)
-      : await enregistrerReponse(payload);
+      : formId === FORMULAIRE_PARTENAIRE
+        ? await enregistrerPartenaire(payload)
+        : await enregistrerReponse(payload);
     console.log('Réponse enregistrée', payload?.data?.responseId, r);
     return res.status(200).json({ ok: true, ...r });
   } catch (e) {

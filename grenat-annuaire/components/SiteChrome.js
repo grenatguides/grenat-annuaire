@@ -9,6 +9,7 @@ const NAV = [
   { label: 'Le métier', href: `${SITE}/m%C3%A9tier` },
   { label: 'Annuaire', href: '/' },
   { label: 'Agenda', href: '/agenda' },
+  { label: 'Adhérer', href: '/adherer' },
 ];
 
 const CTA = { label: 'Trouver un guide', href: 'https://tally.so/r/81ZAqo' };
