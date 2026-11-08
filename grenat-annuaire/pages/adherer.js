@@ -42,8 +42,10 @@ export default function Adherer() {
           <p className="eyebrow">Adhésion 2027</p>
           <h1>Rejoindre Grenat</h1>
           <p className="intro">
-            Remplissez le formulaire qui vous correspond, puis réglez votre cotisation sur HelloAsso
-            avec la même adresse e-mail. L&#39;adhésion est valable jusqu&#39;au 31 décembre 2027.
+            Remplissez le formulaire qui vous correspond. Les membres actifs règlent ensuite leur
+            cotisation sur HelloAsso ; les demandes des membres affiliés et partenaires sont d&#39;abord
+            examinées par le conseil d&#39;administration, qui envoie ensuite le lien de paiement.
+            L&#39;adhésion est valable jusqu&#39;au 31 décembre 2027.
           </p>
         </div>
       </header>
