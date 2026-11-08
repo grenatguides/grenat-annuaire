@@ -18,7 +18,6 @@ const FORMULES = [
     plus: ['La vie de l’association : AG, éductours, JIG…', 'Les informations du réseau'],
     lien: 'https://tally.so/r/zxpZ4M',
     bouton: 'Adhérer comme affilié·e',
-    note: 'Même formulaire que les guides : choisissez « Membre affilié\u00b7e » à la première question.',
   },
   {
     titre: 'Membre partenaire',
