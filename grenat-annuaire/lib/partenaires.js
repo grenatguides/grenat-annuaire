@@ -14,6 +14,7 @@
 //  modifier la ligne correspondante ci-dessous.
 // =============================================================================
 
+import { notifierDemande } from './notifications';
 import { notion, val, lireReponse, norm, chercherParEmail, copierFichier, BASE_ADHERENTS } from './adhesions';
 
 export const FORMULAIRE_PARTENAIRE = 'Qo1dbG';
@@ -79,12 +80,16 @@ export async function enregistrerPartenaire(payload) {
   for (const f of fichiers) props[f.colonne] = { files: await Promise.all(f.fichiers.slice(0, 3).map(copierFichier)) };
 
   const existant = await chercherParEmail(BASE_ADHERENTS, email);
+  const t = (k) => props[k]?.rich_text?.[0]?.text?.content || props[k]?.title?.[0]?.text?.content || '';
+  const alerte = (id) => notifierDemande({ categorie: 'Membre partenaire', nom: t('Nom'), prenom: t('Prénom'), email, structure: t('Société'), pageId: id });
   if (existant) {
     // On ne remplace pas une catégorie mise à la main (ex. membre d'honneur)
     if (existant.properties?.['Catégorie']?.select?.name === "Membre d'honneur") delete props['Catégorie'];
     await notion(`pages/${existant.id}`, { method: 'PATCH', body: { properties: props } });
+    await alerte(existant.id);
     return { adherent: existant.id, categorie: 'Membre partenaire' };
   }
   const page = await notion('pages', { method: 'POST', body: { parent: { database_id: BASE_ADHERENTS }, properties: props } });
+  await alerte(page.id);
   return { adherent: page.id, categorie: 'Membre partenaire', nouveau: true };
 }

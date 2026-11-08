@@ -1,3 +1,4 @@
+import { notifierDemande } from './notifications';
 // =============================================================================
 //  ADHÉSIONS GRENAT : enregistrement des réponses du formulaire Tally dans Notion
 // =============================================================================
@@ -376,7 +377,7 @@ export async function copierFichier(f) {
 
 export async function enregistrerReponse(payload) {
   const lu = lireReponse(payload);
-  const { annuaire, adherent, fichiers, email, base, autres, affilie } = repartir(lu);
+  const { annuaire, adherent, fichiers, email, base, autres, affilie, nom, prenom } = repartir(lu);
   const categorie = affilie ? 'Membre affilié' : 'Guide actif';
   if (affilie) adherent["Apparaître dans l'annuaire"] = val.choix('Non');
   const dateReponse = (lu.date || new Date().toISOString()).slice(0, 10);
@@ -430,6 +431,11 @@ export async function enregistrerReponse(payload) {
     await notion(`pages/${adh.id}`, { method: 'PATCH', body: { properties: adherent } });
   } else {
     adh = await notion('pages', { method: 'POST', body: { parent: { database_id: BASE_ADHERENTS }, properties: adherent } });
+  }
+
+  // Demande de membre affilié : alerte au CA (validation avant paiement)
+  if (affilie) {
+    await notifierDemande({ categorie: 'Membre affilié', nom, prenom, email, pageId: adh.id });
   }
 
   return { fiche: fiche?.id || null, adherent: adh.id, categorie, nouveau: !lien && !lu.caches.guide_id };
