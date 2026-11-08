@@ -21,6 +21,7 @@
 // =============================================================================
 
 import { notion, val, lireReponse, lirePage, norm, copierFichier, BASE_ANNUAIRE } from './adhesions';
+import { imageNotion } from './notion';
 
 export const BASE_VISITES = '2f1eef96524a80ceae24fd698eacc8f9';
 export const FORMULAIRE_VISITE = 'BEaZK4';
@@ -155,7 +156,7 @@ function parseVisite(page) {
     public: p.Public?.select?.name || '',
     langues: (p.Langues?.multi_select || []).map((o) => o.name),
     description: t(p.Description),
-    photo: photo ? (photo.type === 'file' ? photo.file?.url : photo.external?.url) || null : null,
+    photo: photo ? (photo.type === 'file' ? imageNotion(page.id, 'visite') : photo.external?.url) || null : null,
     lien: p['Lien de réservation']?.url || '',
     guideIds: (p['Guides - Annuaire Public']?.relation || []).map((r) => normId(r.id)),
   };

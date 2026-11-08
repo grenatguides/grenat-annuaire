@@ -22,12 +22,14 @@ export function CarteVisite({ v, compact = false, externe = false, avecGuide = t
         <span className="vd-num">{resteDate[0]}</span>
         <span className="vd-mois">{resteDate.slice(1).join(' ')}</span>
       </div>
-      {v.photo && !compact && <img src={v.photo} alt="" className="visite-photo" loading="lazy" />}
+      {v.photo && !compact && <img src={v.photo} alt={`Visite « ${v.titre} »`} className="visite-photo" loading="lazy" width="180" height="130" />}
       <div className="visite-corps">
         <h3 className="visite-titre">{v.titre}</h3>
         <p className="visite-quand">
-          {v.dateLabel.charAt(0).toUpperCase() + v.dateLabel.slice(1)}
-          {v.horaire && <> · {v.horaire}</>}
+          <time dateTime={v.debut}>
+            {v.dateLabel.charAt(0).toUpperCase() + v.dateLabel.slice(1)}
+            {v.horaire && <> · {v.horaire}</>}
+          </time>
         </p>
         {v.lieu && <p className="visite-lieu">📍 Rendez-vous : {v.lieu}</p>}
         {!compact && v.description && <p className="visite-desc">{v.description}</p>}
@@ -41,14 +43,14 @@ export function CarteVisite({ v, compact = false, externe = false, avecGuide = t
           {avecGuide && (
             <a href={ficheGuide} className="visite-guide" {...cible}>
               {v.guide.photo
-                ? <img src={v.guide.photo} alt="" className="vg-photo" />
+                ? <img src={v.guide.photo} alt="" className="vg-photo" loading="lazy" width="32" height="32" />
                 : <span className="vg-photo vg-init">{v.guide.nom.charAt(0)}</span>}
               <span>avec <strong>{v.guide.nom}</strong></span>
             </a>
           )}
           {v.lien
-            ? <a href={v.lien} className="visite-btn" target="_blank" rel="noopener noreferrer">Réserver</a>
-            : <a href={ficheGuide} className="visite-btn visite-btn-sec" {...cible}>Contacter le guide</a>}
+            ? <a href={v.lien} className="visite-btn" target="_blank" rel="noopener noreferrer" aria-label={`Réserver « ${v.titre} » (nouvel onglet)`}>Réserver</a>
+            : <a href={ficheGuide} className="visite-btn visite-btn-sec" {...cible} aria-label={`Contacter ${v.guide.nom}, guide de « ${v.titre} »`}>Contacter le guide</a>}
         </div>
       </div>
       <style jsx>{`

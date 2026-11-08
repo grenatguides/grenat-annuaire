@@ -18,6 +18,9 @@ export function lireBase(p) {
   return (f.rich_text || f.title || []).map((t) => t.plain_text).join('').trim();
 }
 
+// Lien fixe vers une image Notion (voir pages/api/image.js) : les liens Notion expirent après 1 h
+export const imageNotion = (id, cle) => `/api/image?id=${String(id).replace(/-/g, '')}&p=${cle}`;
+
 export function parseGuide(page) {
   const p = page.properties;
   const nom = p['Nom']?.title?.[0]?.plain_text || '';
@@ -27,14 +30,14 @@ export function parseGuide(page) {
   let photo = null;
   if (photoFiles.length > 0) {
     const f = photoFiles[0];
-    photo = f.type === 'file' ? f.file?.url : f.external?.url;
+    photo = f.type === 'file' ? imageNotion(page.id, 'photo') : f.external?.url;
   }
 
   const richText = (field) =>
     (field?.rich_text || []).map((t) => t.plain_text).join('');
-  const fileUrl = (field) => {
+  const fileUrl = (field, cle) => {
     const f = field?.files?.[0];
-    return f ? (f.type === 'file' ? f.file?.url : f.external?.url) || null : null;
+    return f ? (f.type === 'file' ? imageNotion(page.id, cle) : f.external?.url) || null : null;
   };
 
   // Coordonnées que le guide a choisi de masquer : elles ne quittent jamais le serveur
@@ -75,7 +78,7 @@ export function parseGuide(page) {
     visitePhare: {
       titre: richText(p['Visite phare – titre']),
       description: richText(p['Visite phare – description']),
-      image: fileUrl(p['Visite phare – image']),
+      image: fileUrl(p['Visite phare – image'], 'vp'),
     },
   };
 }

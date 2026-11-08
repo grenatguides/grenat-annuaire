@@ -20,8 +20,11 @@ export default function App({ Component, pageProps }) {
   if (embed) return <Component {...pageProps} />;
   return (
     <>
+      <a href="#contenu" className="lien-evitement">Aller au contenu</a>
       <SiteHeader />
-      <Component {...pageProps} />
+      <div id="contenu" tabIndex={-1}>
+        <Component {...pageProps} />
+      </div>
       <SiteFooter />
     </>
   );
