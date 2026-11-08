@@ -5,6 +5,8 @@ import { ListeVisites } from './Visites';
 
 const unique = (arr) => [...new Set(arr.filter(Boolean))];
 const trier = (arr) => unique(arr).sort((a, b) => a.localeCompare(b, 'fr'));
+// « Lyon 6 », « Lyon 7e »… sont regroupés sous « Lyon » dans le filtre (la carte garde l'arrondissement)
+const villeFiltre = (v) => (v || '').replace(/^(lyon|paris|marseille)\s*\d+\s*(e|er|ème)?$/i, (m, ville) => ville.charAt(0).toUpperCase() + ville.slice(1).toLowerCase());
 
 function Filtre({ label, valeur, options, tous, onChange }) {
   return (
@@ -32,14 +34,14 @@ export default function Agenda({ visites, externe = false }) {
   const maj = (cle) => (valeur) => setF((x) => ({ ...x, [cle]: valeur }));
 
   const options = useMemo(() => ({
-    ville: trier(visites.map((v) => v.ville)),
+    ville: trier(visites.map((v) => villeFiltre(v.ville))),
     departement: trier(visites.map((v) => v.departement)),
     mois: unique(visites.map((v) => v.mois)), // déjà dans l'ordre chronologique
     langue: trier(visites.flatMap((v) => v.langues)),
   }), [visites]);
 
   const liste = visites.filter((v) =>
-    (!f.ville || v.ville === f.ville) &&
+    (!f.ville || villeFiltre(v.ville) === f.ville) &&
     (!f.departement || v.departement === f.departement) &&
     (!f.mois || v.mois === f.mois) &&
     (!f.langue || v.langues.includes(f.langue))
@@ -55,7 +57,7 @@ export default function Agenda({ visites, externe = false }) {
           <Filtre label="Mois" valeur={f.mois} options={options.mois} tous="Tous" onChange={maj('mois')} />
           <Filtre label="Langue" valeur={f.langue} options={options.langue} tous="Toutes" onChange={maj('langue')} />
           <div className="bilan">
-            <span>{liste.length} visite{liste.length > 1 ? 's' : ''}</span>
+            <span aria-live="polite">{liste.length} visite{liste.length > 1 ? 's' : ''}</span>
             {actif && (
               <button type="button" onClick={() => setF({ ville: '', departement: '', mois: '', langue: '' })}>
                 Effacer les filtres
